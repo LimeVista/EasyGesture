@@ -13,6 +13,9 @@ import me.limeice.gesture.standard.OnTap;
 
 /**
  * Created by LimeV on 2017/12/3.
+ *
+ * @author LimeVista
+ * @version 1.0
  */
 
 public final class MiniGesture implements DefaultDetector {
@@ -50,27 +53,28 @@ public final class MiniGesture implements DefaultDetector {
         }
     }
 
-    private GestureHandler mHandler;
+    private GestureHandler mHandler;        // 长按处理事件驱动
 
-    private MotionEvent mCurEvent;
+    private MotionEvent mCurEvent;          // 当前事件
 
-    private OnGestureListener mListener;
+    private OnGestureListener mListener;    // 总监听事件
 
-    private OnDrag mDrag;
+    private OnDrag mDrag;                   // 拖拽事件
 
-    private OnLongPress mLongPress;
+    private OnLongPress mLongPress;         // 长按事件
 
-    private OnTap mTap;
+    private OnTap mTap;                     // 单击事件
 
-    private int mLongPressTimeOut = 500;
+    private int mLongPressTimeOut = 500;    // 长按超时
 
-    private int mTouchSlopSquare;
+    private int mTouchSlopSquare;           // 触摸超出范围区域
 
-    private float mLastFocusX, mLastFocusY;
+    private float mLastFocusX, mLastFocusY; // 上一次焦点 x,y 轴值
 
-    private boolean mAlwaysInTapRegion;
+    private boolean mAlwaysInTapRegion;     // 判定点击
 
-    private boolean mInLongPress;
+    private boolean mInLongPress;           // 长按是否响应
+
 
     public MiniGesture(Context context) {
         this(context, null);
@@ -115,22 +119,22 @@ public final class MiniGesture implements DefaultDetector {
                 final float dx = e.getX() - mLastFocusX;
                 final float dy = e.getY() - mLastFocusY;
                 if (mAlwaysInTapRegion) {
-                    mHandler.removeMessages(LONG_PRESS);
                     if ((dx * dx) + (dy * dy) > mTouchSlopSquare) {
                         mAlwaysInTapRegion = false;
                         mLastFocusX = e.getX();
                         mLastFocusY = e.getY();
+                        mHandler.removeMessages(LONG_PRESS);
+                        if (mListener != null)
+                            mListener.onDrag(e, dx, dy);
+                        else
+                            mDrag.onDrag(e, dx, dy);
                     }
-                    if (mListener != null)
-                        mListener.onDrag(dx, dy);
-                    else
-                        mDrag.onDrag(dx, dy);
                 } else {
                     if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
                         if (mListener != null)
-                            mListener.onDrag(dx, dy);
+                            mListener.onDrag(e, dx, dy);
                         else
-                            mDrag.onDrag(dx, dy);
+                            mDrag.onDrag(e, dx, dy);
                         mLastFocusX = e.getX();
                         mLastFocusY = e.getY();
                     }
@@ -156,11 +160,78 @@ public final class MiniGesture implements DefaultDetector {
         ViewConfiguration config = ViewConfiguration.get(context);
         int touchSlop = config.getScaledTouchSlop();
         mTouchSlopSquare = touchSlop * touchSlop;
-        mDrag = (x, y) -> {
+        mDrag = (e, x, y) -> {
         };
         mLongPress = e -> {
         };
         mTap = e -> {
         };
+    }
+
+    /**
+     * 设置所有监听事件，当此监听事件代理为{@code null}时，使用分监听事件，不为 null 时全部使用此事件
+     *
+     * @param listener 监听事件
+     * @return self
+     */
+    public MiniGesture setOnGestureListener(OnGestureListener listener) {
+        this.mListener = listener;
+        return this;
+    }
+
+    /**
+     * 设置拖拽事件，当{@link OnGestureListener} 不为 null 时失效
+     *
+     * @param drag 拖拽事件
+     * @return self
+     */
+    public MiniGesture setDrag(OnDrag drag) {
+        if (drag == null)
+            mDrag = (e,x, y) -> {
+            };
+        else
+            this.mDrag = drag;
+        return this;
+    }
+
+    /**
+     * 设置长按事件，当{@link OnGestureListener} 不为 null 时失效
+     *
+     * @param longPress 长按事件
+     * @return self
+     */
+    public MiniGesture setLongPress(OnLongPress longPress) {
+        if (longPress == null)
+            mLongPress = e -> {
+            };
+        else
+            this.mLongPress = longPress;
+        return this;
+    }
+
+    /**
+     * 设置单击事件，当{@link OnGestureListener} 不为 null 时失效
+     *
+     * @param tap 单击事件
+     * @return self
+     */
+    public MiniGesture setTap(OnTap tap) {
+        if (tap == null)
+            mTap = e -> {
+            };
+        else
+            this.mTap = tap;
+        return this;
+    }
+
+    /**
+     * 设置长按超时时间
+     *
+     * @param longPressTimeOut 时间
+     * @return self
+     */
+    public MiniGesture setLongPressTimeOut(int longPressTimeOut) {
+        this.mLongPressTimeOut = longPressTimeOut;
+        return this;
     }
 }
