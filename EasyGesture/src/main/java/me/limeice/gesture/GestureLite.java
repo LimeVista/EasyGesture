@@ -400,7 +400,7 @@ public final class GestureLite implements DefaultDetector {
                 case MotionEvent.ACTION_MOVE:
                     float cur = calcLength(e);
                     mScale = cur / mLastLength;
-                    if (Math.abs(mScale - 1.0f) > 0.05f) {
+                    if (Math.abs(mScale - 1.0f) > 0.01f) {
                         mLastLength = cur;
                         is = mListener.onScale(mScale, mCurFocusX, mCurFocusY);
                     }
