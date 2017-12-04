@@ -216,7 +216,7 @@ public final class GestureLite implements DefaultDetector {
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                if (mInLongPress) break; // 双击生效
+                if (mInLongPress) break; // 长按已生效
                 if (isScrollEnable) {
                     final float scrollX = mLastFocusX - mCurFocusX;
                     final float scrollY = mLastFocusY - mCurFocusY;
