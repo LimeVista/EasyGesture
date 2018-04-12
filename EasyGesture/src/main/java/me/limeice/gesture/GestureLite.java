@@ -220,6 +220,8 @@ public final class GestureLite implements DefaultDetector {
                 if (isScrollEnable) {
                     final float scrollX = mLastFocusX - mCurFocusX;
                     final float scrollY = mLastFocusY - mCurFocusY;
+                     if (e.getPointerCount() > 1)
+                        mAlwaysInTapRegion = false;
                     if (mAlwaysInTapRegion) {
                         final int dx = (int) (mCurFocusX - mDownFocusX);
                         final int dy = (int) (mCurFocusY - mDownFocusY);
