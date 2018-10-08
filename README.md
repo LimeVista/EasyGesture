@@ -32,3 +32,15 @@ mButton.gesture.setTap {
 }.setLongPressTimeOut(600)
 ```
 ### 更多实例详见Simple
+
+### 使用
+```groovy
+allprojects {
+	repositories {
+		...
+		maven { url 'https://jitpack.io' }
+	}
+}
+
+implementation 'com.github.LimeVista:EasyGesture:1.0.1'
+```
