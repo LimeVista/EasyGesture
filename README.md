@@ -42,5 +42,5 @@ allprojects {
 	}
 }
 
-implementation 'com.github.LimeVista:EasyGesture:1.0.1'
+implementation 'com.github.LimeVista:EasyGesture:1.1.0'
 ```

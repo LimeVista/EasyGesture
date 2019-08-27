@@ -1,5 +1,6 @@
 package me.limeice.gesture;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -30,9 +31,11 @@ public final class MiniGesture implements DefaultDetector {
     }
 
     /**
-     * 监听线程
+     * 监听线程，不存在
      */
+    @SuppressLint("HandlerLeak")
     private final class GestureHandler extends Handler {
+
         GestureHandler() {
             super();
         }
@@ -43,12 +46,13 @@ public final class MiniGesture implements DefaultDetector {
 
         @Override
         public void handleMessage(Message msg) {
+            //noinspection SwitchStatementWithTooFewBranches
             switch (msg.what) {
                 case LONG_PRESS:
                     dispatchLongPress();
                     break;
                 default:
-                    throw new RuntimeException("Unknown gesture" + msg); //who cares
+                    throw new RuntimeException("Unknown gesture" + msg);
             }
         }
     }
@@ -187,7 +191,7 @@ public final class MiniGesture implements DefaultDetector {
      */
     public MiniGesture setDrag(OnDrag drag) {
         if (drag == null)
-            mDrag = (e,x, y) -> {
+            mDrag = (e, x, y) -> {
             };
         else
             this.mDrag = drag;

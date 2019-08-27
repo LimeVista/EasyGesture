@@ -5,9 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Matrix
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.widget.AppCompatButton
+import androidx.appcompat.widget.AppCompatButton
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -56,12 +56,12 @@ class SimpleActivity : AppCompatActivity() {
 
 class MyButton : AppCompatButton {
 
-    open val gesture: MiniGesture
+    val gesture: MiniGesture
 
     constructor(context: Context) : this(context, null)
 
     constructor(context: Context, attrs: AttributeSet?) :
-            this(context, attrs, android.support.v7.appcompat.R.attr.buttonStyle)
+        this(context, attrs, androidx.appcompat.R.attr.buttonStyle)
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         gesture = MiniGesture(context)
@@ -74,7 +74,7 @@ class MyButton : AppCompatButton {
 
 class CustomView : View {
 
-    open val gesture: GestureLite
+    val gesture: GestureLite
 
     private var mBmp: Bitmap
 
@@ -87,7 +87,7 @@ class CustomView : View {
     constructor(context: Context) : this(context, null)
 
     constructor(context: Context, attrs: AttributeSet?) :
-            this(context, attrs, 0)
+        this(context, attrs, 0)
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         listener = object : GestureLite.OnGestureListener {

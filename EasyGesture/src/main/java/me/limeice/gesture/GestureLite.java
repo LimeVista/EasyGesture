@@ -13,9 +13,9 @@ import me.limeice.gesture.standard.DefaultDetector;
  * 手势监听器
  *
  * @author LimeVista
- * @version 1.0
+ * @version 1.1
  */
-
+@SuppressWarnings("unused")
 public final class GestureLite implements DefaultDetector {
 
     private static final int LONG_PRESS = 0x01;
@@ -71,7 +71,7 @@ public final class GestureLite implements DefaultDetector {
          * @param scale  缩放系数
          * @param focusX 缩放中心点横坐标
          * @param focusY 缩放中心点纵坐标
-         * @return
+         * @return {@code true}事件响应 ，{@code false}拒绝响应事件
          */
         boolean onScale(float scale, float focusX, float focusY);
 
@@ -80,67 +80,72 @@ public final class GestureLite implements DefaultDetector {
          *
          * @param e1        起始触摸事件
          * @param e2        终止触摸事件
-         * @param velocityX
-         * @param velocityY
+         * @param velocityX 横向加速度
+         * @param velocityY 纵向加速度
          * @return {@code true}事件响应 ，{@code false}拒绝响应事件
          */
         boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY);
     }
 
     /**
-     * 监听线程
+     * 监听分发处理器
      */
-    private final class GestureHandler extends Handler {
-        GestureHandler() {
+    private final static class GestureHandler extends Handler {
+
+        private final GestureLite mGesture;
+
+        GestureHandler(GestureLite gesture) {
             super();
+            mGesture = gesture;
         }
 
-        GestureHandler(Handler handler) {
+        GestureHandler(GestureLite gesture, Handler handler) {
             super(handler.getLooper());
+            mGesture = gesture;
         }
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case LONG_PRESS:
-                    dispatchLongPress();
+                    mGesture.dispatchLongPress();
                     break;
                 case TAP:
-                    if (isDoubleTapEnable && mConfirmSingleTap)
-                        mListener.onTap(mCurrentDownEvent);
+                    if (mGesture.isDoubleTapEnable && mGesture.mConfirmSingleTap)
+                        mGesture.mListener.onTap(mGesture.mCurrentDownEvent);
                     break;
                 default:
-                    throw new RuntimeException("Unknown gesture" + msg); //who cares
+                    throw new RuntimeException("Unknown gesture" + msg);
             }
         }
     }
 
-    private boolean isScaleEnable = false;        // 是否启用缩放手势
-    private boolean isScrollEnable = false;       // 是否启用滑动手势
-    private boolean isFlingEnable = false;        //是否启用快速滑动手势
-    private boolean isLongPressEnable = false;    // 是否启用长按事件
-    private boolean isDoubleTapEnable = false;          // 双击事件
+    private boolean isScaleEnable = false;                  // 是否启用缩放手势
+    private boolean isScrollEnable = false;                 // 是否启用滑动手势
+    private boolean isFlingEnable = false;                  // 是否启用快速滑动手势
+    private boolean isLongPressEnable = false;              // 是否启用长按事件
+    private boolean isDoubleTapEnable = false;              // 双击事件
 
-    private int mDoubleTapTimeOut = 300;      // 双击按钮超时，default:300ms
-    private int mLongPressTimeOut = 500;      // 长按超时，default:500ms
+    private int mDoubleTapTimeOut = 300;                    // 双击按钮超时，default:300ms
+    private int mLongPressTimeOut = 500;                    // 长按超时，default:500ms
 
-    private GestureHandler mHandler;
-    private OnGestureListener mListener;      // 主事件监听
-    private ScaleGestureDetector mScaleDetector = null; // 缩放手势监听器
+    private GestureHandler mHandler;                        // 时间分发处理器
+    private OnGestureListener mListener;                    // 主事件监听
+    private ScaleGestureDetector mScaleDetector = null;     // 缩放手势监听器
 
     private MotionEvent mCurrentDownEvent;
     private MotionEvent mPreviousUpEvent;
 
-    private boolean mConfirmSingleTap;  // 单击事件是否成立
-    private boolean mInLongPress;       // 长按是否生效
-    private boolean mAlwaysInTapRegion; //是否一直点击区域
-    private boolean mAlwaysInDoubleTapRegion; //是否一直点击区域
+    private boolean mConfirmSingleTap;                      // 单击事件是否成立
+    private boolean mInLongPress;                           // 长按是否生效
+    private boolean mAlwaysInTapRegion;                     // 是否一直点击区域
+    private boolean mAlwaysInDoubleTapRegion;               // 是否一直点击区域
 
     private float mDownFocusX, mDownFocusY, mLastFocusX, mLastFocusY;
     private float mCurFocusX, mCurFocusY;
     private long mLastTime;
-    private int mTouchSlopSquare;       // 点击区域
-    private int mDoubleTouchSlopSquare; // 双击点击区域
+    private int mTouchSlopSquare;                           // 点击区域
+    private int mDoubleTouchSlopSquare;                     // 双击点击区域
 
     private VelocityTracker mVelocityTracker;
     private int mMinFlingVelocity;
@@ -155,9 +160,9 @@ public final class GestureLite implements DefaultDetector {
             throw new NullPointerException("The OnGestureListener must not be null...");
         mListener = listener;
         if (handler != null)
-            mHandler = new GestureHandler(handler);
+            mHandler = new GestureHandler(this, handler);
         else
-            mHandler = new GestureHandler();
+            mHandler = new GestureHandler(this);
         init(context);
     }
 
@@ -167,6 +172,7 @@ public final class GestureLite implements DefaultDetector {
      * @param e 触摸事件
      * @return {@code true}响应事件 {@code false}拒绝响应事件
      */
+    @SuppressWarnings("ConstantConditions")
     @Override
     public boolean onTouchEvent(MotionEvent e) {
         final int action = e.getAction();
@@ -220,7 +226,7 @@ public final class GestureLite implements DefaultDetector {
                 if (isScrollEnable) {
                     final float scrollX = mLastFocusX - mCurFocusX;
                     final float scrollY = mLastFocusY - mCurFocusY;
-                     if (e.getPointerCount() > 1)
+                    if (e.getPointerCount() > 1)
                         mAlwaysInTapRegion = false;
                     if (mAlwaysInTapRegion) {
                         final int dx = (int) (mCurFocusX - mDownFocusX);
@@ -380,7 +386,7 @@ public final class GestureLite implements DefaultDetector {
          * 事件响应接口
          *
          * @param e 触摸事件
-         * @return {@code true}响应事件 {@code false}拒绝响应事件
+         * @return {@code true} 响应事件, {@code false} 拒绝响应事件
          */
         @Override
         public boolean onTouchEvent(MotionEvent e) {
@@ -388,12 +394,8 @@ public final class GestureLite implements DefaultDetector {
                 return false;
             boolean is = false;
             switch (MotionEvent.ACTION_MASK & e.getAction()) {
-                case MotionEvent.ACTION_POINTER_DOWN:
-                    //calcCenter(e);
-                    mLastLength = calcLength(e);
-                    is = true;
-                    break;
 
+                case MotionEvent.ACTION_POINTER_DOWN:
                 case MotionEvent.ACTION_POINTER_UP:
                     mLastLength = calcLength(e);
                     is = true;
