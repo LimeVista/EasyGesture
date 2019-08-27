@@ -1,4 +1,4 @@
-# EasyGesture
+# EasyGesture [![](https://jitpack.io/v/LimeVista/EasyGesture.svg)](https://jitpack.io/#LimeVista/EasyGesture)
 ## Android Gesture Detector
 ### 一个简单的Android手势控件可用于Java、Kotlin项目  
 1. 继承一个控件，使用 <code>MiniGesture</code> 和 <code>GestureLite</code> 类,并重写 <code>onTouchEvent</code> 方法。
