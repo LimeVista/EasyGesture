@@ -2,10 +2,12 @@ package me.limeice.gesture.standard;
 
 import android.view.MotionEvent;
 
-/**
- * Created by LimeV on 2017/12/3.
- */
+import androidx.annotation.NonNull;
 
+/**
+ * 点击接口
+ */
+@FunctionalInterface
 public interface OnTap {
 
     /**
@@ -13,5 +15,5 @@ public interface OnTap {
      *
      * @param event 触摸事件
      */
-    void onTap(MotionEvent event);
+    void onTap(@NonNull MotionEvent event);
 }

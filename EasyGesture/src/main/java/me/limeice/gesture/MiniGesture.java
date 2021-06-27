@@ -7,6 +7,8 @@ import android.os.Message;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
+import androidx.annotation.NonNull;
+
 import me.limeice.gesture.standard.DefaultDetector;
 import me.limeice.gesture.standard.OnDrag;
 import me.limeice.gesture.standard.OnLongPress;
@@ -57,7 +59,7 @@ public final class MiniGesture implements DefaultDetector {
         }
     }
 
-    private GestureHandler mHandler;        // 长按处理事件驱动
+    private final GestureHandler mHandler;  // 长按处理事件驱动
 
     private MotionEvent mCurEvent;          // 当前事件
 
@@ -104,7 +106,7 @@ public final class MiniGesture implements DefaultDetector {
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent e) {
+    public boolean onTouchEvent(@NonNull MotionEvent e) {
         switch (e.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mHandler.sendEmptyMessageDelayed(LONG_PRESS, mLongPressTimeOut);

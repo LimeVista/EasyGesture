@@ -7,6 +7,11 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import java.util.Objects;
+
 import me.limeice.gesture.standard.DefaultDetector;
 
 /**
@@ -18,8 +23,14 @@ import me.limeice.gesture.standard.DefaultDetector;
 @SuppressWarnings("unused")
 public final class GestureLite implements DefaultDetector {
 
+    /**
+     * 长按事件定义
+     */
     private static final int LONG_PRESS = 0x01;
 
+    /**
+     * 点击事件定义
+     */
     private static final int TAP = 0x02;
 
     public interface OnGestureListener {
@@ -29,21 +40,27 @@ public final class GestureLite implements DefaultDetector {
          *
          * @param e 触摸事件
          */
-        void onLongPress(MotionEvent e);
+        default void onLongPress(@NonNull MotionEvent e) {
+
+        }
 
         /**
          * 双击事件
          *
          * @param e 触摸事件
          */
-        void onDoubleTap(MotionEvent e);
+        default void onDoubleTap(@NonNull MotionEvent e) {
+
+        }
 
         /**
          * 单击事件
          *
          * @param e 触摸事件
          */
-        void onTap(MotionEvent e);
+        default void onTap(@NonNull MotionEvent e) {
+
+        }
 
         /**
          * 按下事件，参见{@link MotionEvent}
@@ -51,7 +68,7 @@ public final class GestureLite implements DefaultDetector {
          * @param e 触摸事件
          * @return {@code true}事件响应 ，{@code false}拒绝响应事件
          */
-        boolean onDown(MotionEvent e);
+        boolean onDown(@NonNull MotionEvent e);
 
         /**
          * 滑动或拖动事件
@@ -62,8 +79,14 @@ public final class GestureLite implements DefaultDetector {
          * @param distanceY 事件产生y轴距离
          * @return {@code true}事件响应 ，{@code false}拒绝响应事件
          */
-        boolean onScroll(MotionEvent e1, MotionEvent e2,
-                         float distanceX, float distanceY);
+        default boolean onScroll(
+                @NonNull MotionEvent e1,
+                @NonNull MotionEvent e2,
+                float distanceX,
+                float distanceY
+        ) {
+            return false;
+        }
 
         /**
          * 缩放事件
@@ -73,7 +96,9 @@ public final class GestureLite implements DefaultDetector {
          * @param focusY 缩放中心点纵坐标
          * @return {@code true}事件响应 ，{@code false}拒绝响应事件
          */
-        boolean onScale(float scale, float focusX, float focusY);
+        default boolean onScale(float scale, float focusX, float focusY) {
+            return false;
+        }
 
         /**
          * 快速滑动事件
@@ -84,7 +109,14 @@ public final class GestureLite implements DefaultDetector {
          * @param velocityY 纵向加速度
          * @return {@code true}事件响应 ，{@code false}拒绝响应事件
          */
-        boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY);
+        default boolean onFling(
+                @NonNull MotionEvent e1,
+                @NonNull MotionEvent e2,
+                float velocityX,
+                float velocityY
+        ) {
+            return false;
+        }
     }
 
     /**
@@ -111,8 +143,9 @@ public final class GestureLite implements DefaultDetector {
                     mGesture.dispatchLongPress();
                     break;
                 case TAP:
-                    if (mGesture.isDoubleTapEnable && mGesture.mConfirmSingleTap)
+                    if (mGesture.isDoubleTapEnable && mGesture.mConfirmSingleTap) {
                         mGesture.mListener.onTap(mGesture.mCurrentDownEvent);
+                    }
                     break;
                 default:
                     throw new RuntimeException("Unknown gesture" + msg);
@@ -129,8 +162,8 @@ public final class GestureLite implements DefaultDetector {
     private int mDoubleTapTimeOut = 300;                    // 双击按钮超时，default:300ms
     private int mLongPressTimeOut = 500;                    // 长按超时，default:500ms
 
-    private GestureHandler mHandler;                        // 时间分发处理器
-    private OnGestureListener mListener;                    // 主事件监听
+    private final GestureHandler mHandler;                  // 时间分发处理器
+    private final OnGestureListener mListener;              // 主事件监听
     private ScaleGestureDetector mScaleDetector = null;     // 缩放手势监听器
 
     private MotionEvent mCurrentDownEvent;
@@ -151,18 +184,18 @@ public final class GestureLite implements DefaultDetector {
     private int mMinFlingVelocity;
     private int mMaxFlingVelocity;
 
-    public GestureLite(Context context, OnGestureListener listener) {
+    public GestureLite(@NonNull Context context, @NonNull OnGestureListener listener) {
         this(context, null, listener);
     }
 
-    public GestureLite(Context context, Handler handler, OnGestureListener listener) {
-        if (listener == null)
-            throw new NullPointerException("The OnGestureListener must not be null...");
+    public GestureLite(
+            @NonNull Context context,
+            @Nullable Handler handler,
+            @NonNull OnGestureListener listener
+    ) {
+        Objects.requireNonNull(listener, "The OnGestureListener must not be null...");
         mListener = listener;
-        if (handler != null)
-            mHandler = new GestureHandler(this, handler);
-        else
-            mHandler = new GestureHandler(this);
+        mHandler = handler != null ? new GestureHandler(this, handler) : new GestureHandler(this);
         init(context);
     }
 
@@ -174,7 +207,7 @@ public final class GestureLite implements DefaultDetector {
      */
     @SuppressWarnings("ConstantConditions")
     @Override
-    public boolean onTouchEvent(MotionEvent e) {
+    public boolean onTouchEvent(@NonNull MotionEvent e) {
         final int action = e.getAction();
         if (isFlingEnable) {
             if (mVelocityTracker == null)
@@ -389,7 +422,7 @@ public final class GestureLite implements DefaultDetector {
          * @return {@code true} 响应事件, {@code false} 拒绝响应事件
          */
         @Override
-        public boolean onTouchEvent(MotionEvent e) {
+        public boolean onTouchEvent(@NonNull MotionEvent e) {
             if (e.getPointerCount() < 2)
                 return false;
             boolean is = false;
@@ -493,71 +526,79 @@ public final class GestureLite implements DefaultDetector {
         return this;
     }
 
+    /**
+     * 是否启用缩放手势
+     *
+     * @return {@code true}开启，{@code false}禁用
+     */
     public boolean isScaleEnable() {
         return isScaleEnable;
     }
 
+    /**
+     * 是否启用滑动手势
+     *
+     * @return {@code true}开启，{@code false}禁用
+     */
     public boolean isScrollEnable() {
         return isScrollEnable;
     }
 
+    /**
+     * 是否启用快速滑动手势
+     *
+     * @return {@code true}开启，{@code false}禁用
+     */
     public boolean isFlingEnable() {
         return isFlingEnable;
     }
 
+    /**
+     * 是否启用长按手势
+     *
+     * @return {@code true}开启，{@code false}禁用
+     */
     public boolean isLongPressEnable() {
         return isLongPressEnable;
     }
 
+    /**
+     * 是否启用双击手势
+     *
+     * @return {@code true}开启，{@code false}禁用
+     */
     public boolean isDoubleTapEnable() {
         return isDoubleTapEnable;
     }
 
+    /**
+     * 返回双击最大间隔时间
+     *
+     * @return 间隔时间
+     */
     public int getDoubleTapTimeOut() {
         return mDoubleTapTimeOut;
     }
 
+    /**
+     * 返回长按间隔时间
+     *
+     * @return 间隔时间
+     */
     public int getLongPressTimeOut() {
         return mLongPressTimeOut;
     }
 
     /**
      * 简单手势监听器
+     *
+     * @deprecated OnGestureListener 使用默认接口，这类没有存在意义了
      */
+    @Deprecated
     public static class SimpleListener implements OnGestureListener {
 
         @Override
-        public void onLongPress(MotionEvent e) {
-
-        }
-
-        @Override
-        public void onDoubleTap(MotionEvent e) {
-
-        }
-
-        @Override
-        public void onTap(MotionEvent e) {
-
-        }
-
-        @Override
-        public boolean onDown(MotionEvent e) {
-            return false;
-        }
-
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            return false;
-        }
-
-        @Override
-        public boolean onScale(float scale, float focusX, float focusY) {
-            return false;
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        public boolean onDown(@NonNull MotionEvent e) {
             return false;
         }
     }

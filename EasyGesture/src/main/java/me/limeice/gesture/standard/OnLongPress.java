@@ -2,10 +2,12 @@ package me.limeice.gesture.standard;
 
 import android.view.MotionEvent;
 
-/**
- * Created by LimeV on 2017/12/3.
- */
+import androidx.annotation.NonNull;
 
+/**
+ * 长按接口
+ */
+@FunctionalInterface
 public interface OnLongPress {
 
     /**
@@ -13,5 +15,5 @@ public interface OnLongPress {
      *
      * @param event 触摸事件
      */
-    void onLongPress(MotionEvent event);
+    void onLongPress(@NonNull MotionEvent event);
 }
